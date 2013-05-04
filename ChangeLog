@@ -1,0 +1,41 @@
+CURRENT VERSION:
+Name:  VoIP Hopper
+Version:  2.04
+Release Date:  Thu, 4/26/12
+
+Updated:
+-Fixed spoofing of LLDP device ID in lldp.c, for proper dynamic spoofing of LLDP-MED packet TLVs 
+-Fixed compile error with Makefile.am directive bugs causing compile problems in Ubuntu 11.10/12.04 LTS.
+
+Bugs:
+1)  There appears to be a bug with delayed pcap implementation for ARP packet analysis.  Delayed of roughly 10 seconds. 
+
+To Do:
+1)  Port to Mac OS X
+2)  Assessment mode scan of DHCP VVID discovery (Avaya, Nortel, Alcatel)
+3)  Resolve warning with 'gets' function dangerous and  should not be used
+
+PREVIOUS VERSIONS:
+Version:  2.01
+Release Date:  8/25/11
+-Fixed a few typos in main.c, with the printing of "Device ID" (-E, not -D).  Thanks to Vladimir Kot for catching this Tue, 2/8/11.
+
+Version:  1.02
+Release Date:  6/6/10
+Bugs:  
+1)  Fixed a bug in DHCP code with DHCP invalid Options in Cisco IOS
+New behavior in Cisco IOS under DDTS CSCso19800
+Credit:  Thank you Miss Kppl (mkppl@yahoo.fr) for identifying this issue
+2)  Fixed bug with Avaya Voice VLAN Discovery in which L2QVLAN field wasn't getting parsed properly in served response from DHCP server, thanks to Mike Jones for helping to test and identify this with an onsite Avaya customer.
+
+Version:  1.0
+Release Date:  5/5/09
+
+Version:  0.99
+Release Date:  2/18/08
+
+Version:  0.97
+Release Date:  10/22/07
+
+Version:  0.90
+Release Date:  9/9/07

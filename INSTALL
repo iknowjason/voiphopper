@@ -1,0 +1,5 @@
+INSTALLATION:
+tar xvfz voiphopper-x.xx.tar.gz
+cd voiphopper-x.xx
+make
+make install

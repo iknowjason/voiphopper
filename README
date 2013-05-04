@@ -1,0 +1,94 @@
+INSTALLATION:
+tar xvfz voiphopper-x.xx.tar.gz
+cd voiphopper-x.xx
+make
+make install
+NOTE:  The latest tested development environment is Ubuntu 12.04 LTS.
+
+NEWS:
+Date:  April 26, 2012
+VoIP Hopper 2.04 is released!
+	
+SUMMARY OF NEW FEATURES:
+* New Avaya DHCP Option 242 Auto VLAN Discovery
+* Alcatel-Lucent infrastructure support, including 3 new Alcatel modes!
+  1.  Alcatel VVID Auto Discovery via DHCP client spoofing (DHCP Option 43)
+  2.  Alcatel VVID Auto Discovery via LLDP-MED Spoofing (Alcatel packet LLDP-MED)
+  3.  Alcatel specify VLAN ID for Alcatel compliant DHCP request  
+* Spoofing MAC Address of Alcatel IP Phone in DHCP client Option 12 and 61 (for Alcatel compliant DHCP client) 
+* Proper spoofing of LLDP-MED packet TLVs with user supplied MAC Address (Cisco, Alcatel) 
+
+For the complete feature list, see http://voiphopper.sourceforge.net/features.html
+
+
+SUMMARY OF RECENT "NEW" FEATURES:
+* Assessment Mode:  An interactive mode with several sub-features.  Great for pentesting.
+* New VLAN Discovery Protocol method:  LLDP-MED (spoofing, sniffing).
+* New VLAN Discovery Protocol method:  802.1q.  The tool now has an 802.1q frame libpcap sniffer.
+* Automated, passive ARP sniffer (for discovery of IP Phones in Voice VLAN subnet) records all learned IP Phones into a text file, voip-hosts.txt, via analysis of broadcast ARP traffic.
+* ARP sniffer can record all devices on the default interface to a file, hosts.txt, via analysis of broadcast ARP traffic.  Great for passive discovery during a pentest, and obviates the need to do more intrusive ARP scanning.
+* Can VLAN Hop and sniff even when DHCP is disabled (assessment mode).  Can 'become' an IP Phone by setting a static IP address and spoofing the MAC address from a list of previously discovered phones.
+* Automatically VLAN hops via first discovered VLAN ID (CDP, LLDP, 802.1q) when running in assessment mode.
+* Resolved several bugs with integrated DHCP client code.
+
+INTRODUCTION
+VoIP Hopper is a GPLv3 licensed security tool, written in C, that rapidly runs a VLAN Hop into the Voice VLAN on specific ethernet switches. VoIP Hopper does this by mimicking the behavior of an IP Phone, in Cisco, Avaya, Alcatel, and Nortel environments.  This requires two important steps in order for the tool to traverse VLANs for unauthorized access.  First,  discovery of the correct 12 bit Voice VLAN ID (VVID) used by the IP Phones is required.  VoIP Hopper supports multiple protocol discovery methods (CDP, DHCP, LLDP-MED, 802.1q ARP) for this important first step.  Second, the tool creates a virtual VoIP ethernet interface on the OS.  It then inserts a spoofed 4-byte 802.1q vlan header containing the 12 bit VVID into a spoofed DHCP request.  Once it receives an IP address in the VoIP VLAN subnet, all subsequent ethernet frames are "tagged" with the spoofed 802.1q header.  VoIP Hopper is a VLAN Hop test tool but also a tool to test VoIP infrastructure security.
+
+In Cisco IP Phone networks, it first dissects either IEEE 802.3 or Ethernet II for Cisco Discovery Protocol (CDP) packets. If CDP is enabled on the switch port and the Voice VLAN feature is enabled, it will determine the VVID. This will allow the tool to create a new Ethernet interface on the PC that tags the 802.1q VLAN header in the Ethernet packet. After VoIP Hopper has created the new Ethernet device, it will send a DHCP client request. It can also generate CDP messages just as an IP Phone based on CDP would do. It will send two CDP packets, requesting the Voice VLAN ID. After creating the new interface, it will then iterate between sleeping for 60 seconds, and sending a CDP packet.
+
+In Avaya IP Phone environments, it sends an Option 55 parameter request list, requesting Option 176. When the DHCP server sends Option 176, it decodes the L2QVLAN reply field for the Voice VLAN ID. It then creates a new voice interface and sends a DHCP request.
+
+In Nortel IP Phone networks, VoIP Hopper sends an Option 55 parameter request list, requesting Option 191. When the DHCP Server sends Option 191 data, it decodes the VLAN-A: string for the Voice VLAN ID. It then creates a new voice interface and sends a DHCP request.
+
+In Alcatel-Lucent infrastructures, VoIP Hopper sends an Option 55 parameter request list, requesting Option 43. When the DHCP Server sends Option 43 data, it decodes the hex bytes for the Voice VLAN ID. It then creates a new voice interface and sends a DHCP request.  It can also spoof Alcatel-Lucent LLDP-MED packets and the specific MAC address of IP Phones in DHCP Option 12/61 and LLDP-MED TLVs.
+
+VoIP Hopper has some new generic protocol discovery methods for automatically learning the VVID.  It now supports an IEEE 802.1q header dissector, to enumerate the VVID through ARP and other broadcast / multicast traffic.  This issue has recently been observed in myriad VoIP infrastructures, since most switch ports directly connected to IP Phones, by default, are enabled for 802.1q trunking.  It also supports LLDP-MED spoofing and sniffing.  With this new feature, VoIP Hopper can automatically discover the VVID through LLDP-MED.
+
+NEW FEATURE:  ASSESSMENT MODE 
+VoIP Hopper has a new, awesome and powerful feature that can be used to make your VoIP pentesting more effective.  It's called 'assessment mode'.  It's a menu driven interface in which you can pass individual commands to VoIP Hopper, while the tool has a sniffer loop doing it's job of VLAN Hopping in an automated way.  When you launch VoIP Hopper in assessment mode, a libpcap loop is listening for any traffic that could allow it to discover the Voice VLAN ID.  This includes CDP, LLDP-MED, 802.1q ethernet frames containing a VLAN ID.  For the first dissected packet that contains a VLAN ID, VoIP Hopper will automatically VLAN Hop, creating a virtual VoIP interface, sending a tagged DHCP request, and then adding an ARP Sniffer on the new VoIP Interface.  This ARP Sniffer will basically listen for the IP Phones, and any discovered devices on the new VoIP VLAN (via broadcast ARP packets) to a file, 'voip-hosts.txt'.  After launching assessment mode, you can also (at any time, such as before the sniffer detects a VVID) manually attempt to VLAN Hop by spoofing CDP or LLDP-MED, by hitting the correct menu selection.  Another cool feature of assessment mode is something demonstrated at DefCon 19.  When environments have DHCP disabled, VoIP Hopper's integrated DHCP client will automatically time out after 20 seconds, and still create the VoIP interface with a dummy static IP address, and will still add the ARP listener on the new VoIP interface, sniffing for traffic.  With this new menu driven CLI interface for VoIP Hopper, I can focus on creating new features and just add them as menu options.  My next feature will be a scanner that can attempt to send multiple protocol methods, looking for a VLAN ID.  This includes the missing pieces of VLAN discovery via DHCP, for Nortel and Avaya infrastructures.  You can see the screen shots to see this feature in action, and catch the tutorial video on VoIP Hopper's assessment mode.
+
+WHY?
+VoIP Hopper was written with the specific aim of improving security in VoIP environments by validating Layer 2 protection controls.  It is a VLAN test tool that can be used to validate controls in VoIP environments but also anywhere else VLANs are used (basically everywhere).   
+
+REQUIREMENTS
+libpcap
+linux
+C Compiler 
+
+VoIP Hopper was originally designed to run on BackTrack Linux, although the development platform has lately been Ubuntu 12.04 LTS.  It should compile and run on other versions of UNIX / Linux.
+
+It has been tested to dissect CDP packets on the following Cisco IOS Ethernet Switch platforms:
+1.  Catalyst 3550
+2.  Catalyst 3560
+3.  Catalyst 3750
+4.  Catalyst 6513 with WS-X6148A-GE-45AF module
+
+USAGE
+See the USAGE file included in this tarball for more information.  For video tutorials and screen shots, see the respective links at http://voiphopper.sourceforge.net.
+
+LEGAL LICENSING
+VoIP Hopper is released under the GPLv3. See the LICENSE file for details.
+
+CREDITS
+Nicolas Roux
+Miss Kppl
+Tom Mostyn
+Arjun Sambamoorthy
+Jamal Pecou
+FX, Author of IRPAS Suite
+Ben Greear and his 802.1q VLAN Implementation for Linux
+Nitesh Dhanjani and Justin Clarke
+Remote-Exploit Developers of BackTrack
+John Kindervag & Joel Hart
+Alvaro Lopez Ortega (GNU MAC Changer author)
+Yoichi Hariguchi, Sergei Viznyuk (dhcpcd authors)
+All contributors to Libpcap
+
+DISCLAIMER
+Before you use VoIP Hopper, ensure that you have authorization from the Network Owners to run the tool on your network.  This tool is designed for network engineers, VoIP administrators, and professional security testers to understand vulnerabilities within a network they have permission to assess - only for good and honorable intent.
+
+FEEDBACK
+Please don't flame me to tell me that the design or implementation of the C code is ugly (I already know the code isn't as pretty as Jessica Biel).  If you have constructive feedback about useful features, implementation suggestions, or any insight or feedback on how VoIP Hopper helped you, I would like to hear from you.
+
+AUTHOR
+Jason Ostrom, jpo@pobox.com
