@@ -25,9 +25,9 @@
 #ifdef __GLIBC__
 #include <net/ethernet.h>
 #include <linux/types.h>
-#include <linux/if_tr.h>
+#include <netinet/if_tr.h>
 #else
-#include <linux/if_ether.h>
+#include <netinet/if_ether.h>
 #define ETHERTYPE_IP		0x0800
 #define ETHERTYPE_ARP		0x0806
 #endif
