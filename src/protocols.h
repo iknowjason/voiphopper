@@ -145,7 +145,7 @@ struct lldpinventoryhr {
     u_int8_t    tlvtype;
     u_int8_t    tlvlength;
     u_char      value[5];
-}; 
+};
 
 struct lldpinventoryfr { /* TIA - Inventory - Firmware Revision */
     u_int8_t    tlvtype;
@@ -226,6 +226,7 @@ struct cdp_port {
     u_char              port;           /* pointer to port name */
 };
 
+#define CDP_CAP_IP_PHONE        0x90    /* IP PHONE = host + IP phone flags */
 #define CDP_CAP_LEVEL1          0x40
 #define CDP_CAP_FORWARD_IGMP    0x20
 #define CDP_CAP_NETWORK_LAYER   0x10
@@ -250,7 +251,7 @@ struct cdp_platform {
     u_int16_t           length;
     u_char              platform;       /* pointer to platform string */
 };
- 
+
 struct cdp_vvlanquery {
     u_int16_t           type;
     u_int16_t           length;
@@ -258,13 +259,13 @@ struct cdp_vvlanquery {
 };
 
 struct cdp_duplex {
-    u_int16_t           type;         
+    u_int16_t           type;
     u_int16_t           length;
     u_char              duplex;       /* pointer to duplex byte */
 };
 
 struct cdp_power {
-    u_int16_t           type;        
+    u_int16_t           type;
     u_int16_t           length;
     u_char              powerstring;       /* pointer to power string */
 };

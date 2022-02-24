@@ -1,5 +1,5 @@
 /*
-    voiphopper - VoIP Hopper 
+    voiphopper - VoIP Hopper
     Copyright (C) 2012 Jason Ostrom <jpo@pobox.com>
 
     This file is part of VoIP Hopper.
@@ -208,7 +208,7 @@ int dhcpclientcall(char *vinterface){
         IfNameExt=malloc(IfNameExt_len);
         strcpy(IfName,vinterface);
         strcpy(IfNameExt,vinterface);
-	
+
         if ( killFlag ) killPid(killFlag);
 
         openlog(PROGRAM_NAME,LOG_PID|(DebugFlag?LOG_CONS:0),LOG_LOCAL0);
@@ -224,7 +224,7 @@ int dhcpclientcall(char *vinterface){
         nleaseTime = htonl(LeaseTime);
 	/* Commenting out old sigalarm way of handling */
         //alarm(TimeOut);
-	
+
 	// Start a timer for the dhcp client to properly time out
 	tv_dhcpStartTime = time(NULL);
 
@@ -236,7 +236,7 @@ int dhcpclientcall(char *vinterface){
 			printf("VoIP Hopper dhcp client has timed out after %lu seconds\n",elapsed);
                         return (-1);
 		}
-		
+
         } while ( currState != &dhcpBound ) ;
 
         #if 0
@@ -275,9 +275,9 @@ int dhcpclientcall(char *vinterface){
         #endif
 
         deletePidFile();
-	
+
         return vvid;
-	
+
 }
 
 /* opens the raw socket,
@@ -285,7 +285,7 @@ int dhcpclientcall(char *vinterface){
 int     init_socket_eth(char *device) {
     int                 sfd;
     struct ifreq        ifr;
-  
+
     if ((sfd=socket(PF_INET, SOCK_PACKET, htons(ETH_P_ALL)))<0) {
         perror("socket()");
         return (-1);
@@ -379,7 +379,7 @@ void create_vlan_interface(char *IfName_temp, int vvid){
 }
 
 int ifup(char *interface) {
-	
+
 	/* ioctl to bring up interface, for good good sniffing times on the ethx.xx interface */
 
 	struct ifreq ifr;
@@ -416,7 +416,7 @@ int ifup(char *interface) {
 	//up = (short int)ifr.ifr_flags & IFF_UP;
 	//return up;
 }
-	
+
 
 pcap_t * create_cdp_pcap(char *IfName_temp){
 
@@ -538,7 +538,7 @@ unsigned int mk_spoof_cdp(char *mdeviceid,char *mportid,char *msoftware,char *mp
     cdp_prt->type=htons(TYPE_PORT_ID);
     cdp_prt->length=htons(strlen(mportid)+2*sizeof(u_int16_t));
     memcpy(&(cdp_prt->port),mportid,strlen(mportid));
-    
+
     /* make CDP capabilities entry */
     cdp_caps=(struct cdp_capabilities *)((void *)cdp_prt+(
             sizeof(u_int16_t) + sizeof(u_int16_t) + strlen(mportid)));
@@ -557,6 +557,8 @@ unsigned int mk_spoof_cdp(char *mdeviceid,char *mportid,char *msoftware,char *mp
         cdp_caps->capab=cdp_caps->capab | CDP_CAP_NETWORK_LAYER;
     if (strchr(mcapas,'I'))
         cdp_caps->capab=cdp_caps->capab | CDP_CAP_FORWARD_IGMP;
+		if (strchr(mcapas,'P'))
+				cdp_caps->capab=cdp_caps->capab | CDP_CAP_IP_PHONE;
     if (strchr(mcapas,'r'))
         cdp_caps->capab=cdp_caps->capab | CDP_CAP_LEVEL1;
     cdp_caps->capab=htonl(cdp_caps->capab);
@@ -618,7 +620,7 @@ unsigned int mk_spoof_cdp(char *mdeviceid,char *mportid,char *msoftware,char *mp
     u_char vvq_send_bytes[4] = {0x20,0x02,0x0,0x1};
     cdp_vvq->length=htons(4+2*sizeof(u_int16_t));
     memcpy(&(cdp_vvq->vvlanquery),vvq_send_bytes,4);
-    
+
     cdp_end=(u_char *)((void *)cdp_vvq+(sizeof(u_int16_t) + sizeof(u_int16_t) + 4));
 
     ethh->length = htons((unsigned int)((void *)cdp_end - (void *)llc));
@@ -701,7 +703,7 @@ int get_cdp(u_char *args, const struct pcap_pkthdr *header, const u_char *packet
                                 voipvlanreply = (struct VoIPVLANReply*)(packet + SIZE_ETHERNET + SIZE_LLC +SIZE_CDPHEADER + cdp_poffset + 1);
                                 vvlan_id = ntohs(voipvlanreply->voicevlan);
 				if(assessment_mode == 1) {
-				
+
 					if(ass_cdp_vvid_discovered == 0) {
 						// only print discovered VVID through CDP once
                                 		printf("Discovered VoIP VLAN through CDP: %d\n",vvlan_id);
@@ -817,9 +819,9 @@ void cdp_mode(int mode , char *IfName_temp){
 	pcap_t *pcap_handle;
 
 	if(mode == 0){
-					
+
 		pcap_handle = create_cdp_pcap(IfName_temp);
-		
+
 		int vvid = 0;
                 while (vvid == 0) {
 
@@ -858,7 +860,7 @@ void cdp_mode(int mode , char *IfName_temp){
                 char *S_platform         = "cisco WS-C3560G-4PS";
                 char *S_software         = "P003-08-8-00";
                 char *S_duplex           = "1";
-	
+
 
 		pcap_handle = create_cdp_pcap(IfName_temp);
 
@@ -922,15 +924,15 @@ void cdp_mode(int mode , char *IfName_temp){
 
 		pthread_t threads[1];
 		int rc,t;
-		
+
 		rc = pthread_create(&threads[0],NULL,send_cdp,(void *)atsock);
 		if(rc){
 			printf("Error: pthread_create error %d \n",rc);
 			exit(-1);
 		}
 
-	}		        			
-} 
+	}
+}
 
 void vlan_hop(int vvid,char *IfName_temp){
 
@@ -938,14 +940,14 @@ void vlan_hop(int vvid,char *IfName_temp){
 	char vinterface[BUFSIZ];
         snprintf(vinterface, sizeof(vinterface), "%s.%d", IfName_temp, vvid);
         int return_value = dhcpclientcall(vinterface);
-} 
+}
 
 void *send_cdp(void *threadarg){
 
-	int atsock; 
+	int atsock;
 	atsock = (int)threadarg;
-	int retval;	
-	
+	int retval;
+
 	unsigned int ksleeps;
         unsigned int sleepseconds = 60;
         ksleeps = sleep(sleepseconds);
@@ -966,8 +968,8 @@ void *send_cdp(void *threadarg){
 
                 int retval2;
                 retval2 = sendpack_eth(IfName,atsock,cdpframe,retval);
- 
-		/*if(verbosity){ 
+
+		/*if(verbosity){
 		        printf("Sent CDP packet of %d bytes\n",retval2);
 	                printf("Sleeping for 60 seconds before sending another CDP packet\n\n");
                 }*/
@@ -975,7 +977,7 @@ void *send_cdp(void *threadarg){
 		ksleeps = sleep(sleepseconds);
 
         }
-	
+
 }
 int check_if_cdp(const struct pcap_pkthdr *header, const u_char *packet) {
 
@@ -983,7 +985,7 @@ int check_if_cdp(const struct pcap_pkthdr *header, const u_char *packet) {
         int packetlen = header->len;
 
         // check header for
-        // "ether host 01:00:0c:cc:cc:cc and (ether[20:2] = 0x2000 or ether[24:2] = 0x2000)" 
+        // "ether host 01:00:0c:cc:cc:cc and (ether[20:2] = 0x2000 or ether[24:2] = 0x2000)"
 	if ((packet[0] == 0x01 )&&(packet[1] == 0x00)&&(packet[2] == 0x0C)&&(packet[3] == 0xCC)&&(packet[4] == 0xCC)&&(packet[5] == 0xCC)) {
 		//printf("packet is multicast correct destination\n");
 
